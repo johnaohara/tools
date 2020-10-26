@@ -30,4 +30,5 @@ $ node time.js "java -jar /path/to/appication-runner.jar"  "http://localhost:808
 where;
 
 "java -jar /path/to/application-runner.jar" - The command to start the application being tested
+
 "http://localhost:8080/hello" - the URL to test.
