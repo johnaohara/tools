@@ -15,7 +15,7 @@ const cmd = args[0].split(" ");
 
 const startTime = new Date().getTime();
 
-const proc = spawn(cmd[0], cmd.slice(1));
+const proc = spawn(cmd[0], cmd.slice(1), { stdio: 'ignore' });
 
 const intervalHandle = setInterval(() => {
   request(targetUrl, (error, response, body) => {
