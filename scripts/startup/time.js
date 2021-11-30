@@ -2,7 +2,7 @@ const spawn = require("child_process").spawn;
 const request = require("request");
 
 const pingIntervalMs = 5;
-const timeoutMs = 10_000;
+const timeoutMs = 120_000;
 
 const args = process.argv.slice(2);
 
@@ -35,7 +35,7 @@ const intervalHandle = setInterval(() => {
       } else {
           // @ts-ignore
           if (!error || !error.code === "ECONNREFUSED") {
-            console.log(error ? error : response.statusCode);
+	     console.log(error ? error : response.statusCode);
           }
       }
     }
