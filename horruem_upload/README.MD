@@ -2,7 +2,7 @@
 
 ## Setup
 
-1. Create `.env` file with the following entries;
+1. Create `.env` file with the following entries specific to your horreum installation;
 
 ```
 HORREUM_USER=
@@ -49,8 +49,6 @@ $ export $(cat .env | xargs)
 ```
 
 4. [Install Jbang](https://www.jbang.dev/download/)
-
-3. Update `.env` file with configuration specific to your horreum installation
 
 
 ## Run upload
