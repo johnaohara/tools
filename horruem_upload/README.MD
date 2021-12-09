@@ -2,7 +2,26 @@
 
 ## Setup
 
-1. Create job configuration file, e.g.;
+1. Create `.env` file with the following entries;
+
+```
+HORREUM_USER=
+HORREUM_PASS=
+
+JENKINS_HOST=
+HORREUM_HOST=
+KEYCLOAK_HOST=
+KEYCLOAK_REALM=
+KEYCLOAK_CLIENT_ID=
+```
+
+2. Export environmental params;
+
+```shell
+$ export $(cat .env | xargs)
+```
+
+3. Create job configuration file, e.g.;
 
 ```json
 {
@@ -29,15 +48,10 @@
 }
 ```
 
-2. [Install Jbang](https://www.jbang.dev/download/)
+4. [Install Jbang](https://www.jbang.dev/download/)
 
 3. Update `.env` file with configuration specific to your horreum installation
 
-4. Export environmental params;
-
-```shell
-$ export $(cat .env | xargs)
-```
 
 ## Run upload
 
