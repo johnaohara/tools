@@ -1,5 +1,5 @@
 const spawn = require("child_process").spawn;
-const request = require("request");
+const axios = require('axios');
 
 const pingIntervalMs = 5;
 const timeoutMs = 120_000;
@@ -27,19 +27,21 @@ const intervalHandle = setInterval(() => {
     exitProcess(1);
   };
 
-  request(targetUrl, (error, response, body) => {
-      if (!error && response && response.statusCode === 200 && body) {
-          const time = new Date().getTime() - startTime;
-          console.log(time + " ms");
-          exitProcess(0);
-      } else {
-          // @ts-ignore
-          if (!error || !error.code === "ECONNREFUSED") {
-	     console.log(error ? error : response.statusCode);
-          }
-      }
+  axios.get(targetUrl)
+  .then(function (response) {
+	  if( response && response.status === 200 && response.data ){
+	    const time = new Date().getTime() - startTime;
+	    console.log(time + " ms");
+	    exitProcess(0);
+	  }
+  })
+  .catch(function (error) {
+    if (error.response) {
+      console.log(error.response.status);
     }
-  );
+	  //    console.log(error);
+  });
+
 }, pingIntervalMs);
 
 

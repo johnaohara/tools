@@ -13,7 +13,7 @@ Before the script is run for the first time, the required node.js modules requir
 
 ```
 
-$ npm install request
+$ npm install axios
 
 ```
 
