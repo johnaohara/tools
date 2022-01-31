@@ -12,9 +12,9 @@ if (args.length < 2) {
   process.exit(1);
 }
 
-const procCmd = args[0];
-const targetUrl = args[1];
-const cmd = args[0].split(" ");
+const procCmd = args[0].trim();
+const targetUrl = args[1].trim();
+const cmd = procCmd.split(" ");
 
 const startTime = new Date().getTime();
 
