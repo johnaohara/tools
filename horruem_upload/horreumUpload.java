@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -44,7 +44,7 @@ class startupUpload {
 
         static final String JENKINS_URL = "http://{jenkinsHost}/{JOB_PATH}/{BUILD_ID}/artifact/run/{ARTIFACT}";
 
-        private static final Map<String, String> tests = new HashMap<>();
+        private static final Set<HorreumUploadConfig> tests = new HashSet<>();
         private static String jobPath;
 
         private static final String HORREUM_USERNAME;
@@ -63,7 +63,7 @@ class startupUpload {
             HORREUM_HOST = System.getenv("HORREUM_HOST");
             KEYCLOAK_HOST = System.getenv("KEYCLOAK_HOST");
             KEYCLOAK_REALM = System.getenv("KEYCLOAK_REALM");
-            KEYCLOAK_CLIENT_ID = System.getenv("KEYCLOAK_CLIENT_ID");
+            KEYCLOAK_CLIENT_ID = System.getenv("`");
 
             HORREUM_USERNAME = System.getenv("HORREUM_USER");
             HORREUM_PASSWORD = System.getenv("HORREUM_PASS");
@@ -87,15 +87,13 @@ class startupUpload {
                 horreumClient = instantiateHorreumClient();
 
                 loadTestDefinitions();
+
                 // make tmp dir
                 Path tmpDir = Files.createTempDirectory("horreum-upload-");
 
+
                 // iterate through each test
-                tests.entrySet().forEach(
-                        entry -> processUpload(
-                                entry.getKey(),
-                                formatJenkinsUrl(entry.getValue()),
-                                new File(tmpDir.toFile(), entry.getValue())));
+                tests.forEach(entry -> processUpload(tmpDir, entry));
 
                 return CommandResult.SUCCESS;
             } catch (Exception exception) {
@@ -122,7 +120,9 @@ class startupUpload {
 
             for (final JsonNode objNode : artefactsNode) {
                 System.out.println(objNode);
-                tests.put(objNode.get("horreumTest").asText(), objNode.get("filePath").asText());
+                tests.add(new HorreumUploadConfig(objNode.get("horreumTest").asText(), objNode.get("filePath").asText(), objNode.get("start").asText()
+                    , objNode.get("stop").asText(), objNode.get("owner").asText(), objNode.get("schema").asText())
+                );
             }
 
         }
@@ -137,7 +137,10 @@ class startupUpload {
             return resolvedUrl;
         }
 
-        private void processUpload(String name, String jsonUrl, File outputFile) {
+        private void processUpload(Path tmpDir, HorreumUploadConfig config ) {
+
+            String jsonUrl = formatJenkinsUrl(config.getFilePath());
+            File outputFile = new File(tmpDir.toFile(), config.getFilePath());
 
             // download json file
             System.out.println(String.format("Downloading %s: to %s", jsonUrl, outputFile.getAbsolutePath()));
@@ -150,15 +153,15 @@ class startupUpload {
 
                 // upload to horreum
                 String runID = horreumClient.runService.addRunFromData(
-                        "$.build-timestamp", // start
-                        "$.build-timestamp", // stop
-                        name, // test
-                        "perf-team", // owner
-                        Access.PUBLIC, // access
-                        null, // token
-                        "urn:quarkus-quickstart:0.1", // schema
-                        null, // description
-                        json // json
+                    config.getStart(), // start
+                    config.getStop(), // stop
+                    config.getName(), // test
+                    config.getOwner(), // owner
+                    Access.PUBLIC, // access
+                    null, // token
+                    config.getSchema(), // schema
+                    null, // description
+                    json // json
                 );
 
                 System.out.println(String.format("Successfully uploaded data to Horreum: %s", runID));
@@ -187,6 +190,47 @@ class startupUpload {
                     .horreumUser(HORREUM_USERNAME)
                     .horreumPassword(HORREUM_PASSWORD)
                     .build();
+        }
+    }
+    static class HorreumUploadConfig {
+        private final String name;
+        private final String filepath;
+        private final String start;
+        private final String stop;
+        private final String owner;
+        private final String schema;
+
+        public HorreumUploadConfig(String name, String filepath, String start, String stop, String owner, String schema){
+            this.name = name;
+            this.filepath = filepath;
+            this.start = start;
+            this.stop = stop;
+            this.owner = owner;
+            this.schema = schema;
+        }
+
+        public String getName(){
+            return this.name;
+        }
+
+        public String getFilePath(){
+            return this.filepath;
+        }
+
+        public String getStart(){
+            return this.start;
+        }
+
+        public String getStop(){
+            return this.stop;
+        }
+
+        public String getOwner(){
+            return this.owner;
+        }
+
+        public String getSchema(){
+            return this.schema;
         }
     }
 }

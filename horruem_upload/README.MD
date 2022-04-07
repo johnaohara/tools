@@ -29,19 +29,35 @@ $ export $(cat .env | xargs)
     "artefacts": [
         { 
             "horreumTest": "Quarkus - getting-started - JVM",
-            "filePath": "myserver.example.com/getting-started.JVM.json"
+            "filePath": "mwperf-server06.perf.lab.eng.rdu2.redhat.com/getting-started.JVM.json",
+            "start": "$.build-timestamp",
+            "stop": "$.build-timestamp",
+            "owner": "perf-team", 
+            "schema": "urn:quarkus-quickstart:0.1"
         },
         { 
             "horreumTest": "Quarkus - getting-started - native",
-            "filePath": "myserver.example.com/getting-started.native.json"
+            "filePath": "mwperf-server06.perf.lab.eng.rdu2.redhat.com/getting-started.native.json"
+            "start": "$.build-timestamp",
+            "stop": "$.build-timestamp",
+            "owner": "perf-team", 
+            "schema": "urn:quarkus-quickstart:0.1"
         },
         { 
             "horreumTest": "Quarkus - config-quickstart - JVM",
-            "filePath": "myserver.example.com/config-quickstart.JVM.json"
+            "filePath": "mwperf-server06.perf.lab.eng.rdu2.redhat.com/config-quickstart.JVM.json"
+            "start": "$.build-timestamp",
+            "stop": "$.build-timestamp",
+            "owner": "perf-team", 
+            "schema": "urn:quarkus-quickstart:0.1"
         },
         { 
             "horreumTest": "Quarkus - config-quickstart - native",
-            "filePath": "myserver.example.com/config-quickstart.native.json"
+            "filePath": "mwperf-server06.perf.lab.eng.rdu2.redhat.com/config-quickstart.native.json"
+            "start": "$.build-timestamp",
+            "stop": "$.build-timestamp",
+            "owner": "perf-team", 
+            "schema": "urn:quarkus-quickstart:0.1"
         }
     ]
 
