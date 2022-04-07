@@ -63,7 +63,7 @@ class startupUpload {
             HORREUM_HOST = System.getenv("HORREUM_HOST");
             KEYCLOAK_HOST = System.getenv("KEYCLOAK_HOST");
             KEYCLOAK_REALM = System.getenv("KEYCLOAK_REALM");
-            KEYCLOAK_CLIENT_ID = System.getenv("`");
+            KEYCLOAK_CLIENT_ID = System.getenv("KEYCLOAK_CLIENT_ID");
 
             HORREUM_USERNAME = System.getenv("HORREUM_USER");
             HORREUM_PASSWORD = System.getenv("HORREUM_PASS");
