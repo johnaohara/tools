@@ -1,7 +1,7 @@
 ///usr/bin/env jbang "$0" "$@" ; exit $?
 //DEPS org.aesh:aesh:2.6
 //DEPS commons-io:commons-io:2.11.0
-//DEPS io.hyperfoil.tools:horreum-client:0.1
+//DEPS io.hyperfoil.tools:horreum-client:0.3
 //DPES com.fasterxml.jackson.core:jackson-databind:2.13.0
 
 import java.io.File;
@@ -23,6 +23,7 @@ import org.aesh.command.CommandResult;
 import org.aesh.command.invocation.CommandInvocation;
 import org.aesh.command.option.Option;
 import org.apache.commons.io.FileUtils;
+import org.aesh.command.shell.Shell;
 
 import io.hyperfoil.tools.HorreumClient;
 import io.hyperfoil.tools.horreum.entity.json.Access;
@@ -68,6 +69,11 @@ class startupUpload {
             HORREUM_USERNAME = System.getenv("HORREUM_USER");
             HORREUM_PASSWORD = System.getenv("HORREUM_PASS");
 
+        }
+
+        @Override
+        public CommandResult execute(CommandInvocation commandInvocation) throws InterruptedException {
+
             if (HORREUM_USERNAME == null ||
                     HORREUM_PASSWORD == null ||
                     JENKINS_HOST == null ||
@@ -75,34 +81,32 @@ class startupUpload {
                     KEYCLOAK_HOST == null ||
                     KEYCLOAK_REALM == null ||
                     KEYCLOAK_CLIENT_ID == null) {
-                throw new RuntimeException(
-                        "environnement variables are not correctly set!");
-            }
-        }
 
-        @Override
-        public CommandResult execute(CommandInvocation commandInvocation) throws InterruptedException {
+                        commandInvocation.getShell().writeln("ERROR: Environnement variables are not correctly set!");
+    
+                        return CommandResult.FAILURE;
+            }
 
             try {
                 horreumClient = instantiateHorreumClient();
 
-                loadTestDefinitions();
+                loadTestDefinitions(commandInvocation.getShell());
 
                 // make tmp dir
                 Path tmpDir = Files.createTempDirectory("horreum-upload-");
 
 
                 // iterate through each test
-                tests.forEach(entry -> processUpload(tmpDir, entry));
+                tests.forEach(entry -> processUpload(tmpDir, entry, commandInvocation.getShell()));
 
                 return CommandResult.SUCCESS;
             } catch (Exception exception) {
-                System.out.println("Failed to upload to horreum: " + exception.getMessage());
+                commandInvocation.getShell().writeln("ERROR: ".concat(exception.getLocalizedMessage()));
                 return CommandResult.FAILURE;
             }
         }
 
-        private void loadTestDefinitions() throws JsonProcessingException, IOException {
+        private void loadTestDefinitions(Shell shell) throws JsonProcessingException, IOException {
             File configFile = new File(config);
 
             if (!configFile.exists()) {
@@ -119,7 +123,7 @@ class startupUpload {
             }
 
             for (final JsonNode objNode : artefactsNode) {
-                System.out.println(objNode);
+                shell.writeln(objNode.asText());
                 tests.add(new HorreumUploadConfig(objNode.get("horreumTest").asText(), objNode.get("filePath").asText(), objNode.get("start").asText()
                     , objNode.get("stop").asText(), objNode.get("owner").asText(), objNode.get("schema").asText())
                 );
@@ -137,13 +141,13 @@ class startupUpload {
             return resolvedUrl;
         }
 
-        private void processUpload(Path tmpDir, HorreumUploadConfig config ) {
+        private void processUpload(Path tmpDir, HorreumUploadConfig config , Shell shell) {
 
             String jsonUrl = formatJenkinsUrl(config.getFilePath());
             File outputFile = new File(tmpDir.toFile(), config.getFilePath());
 
             // download json file
-            System.out.println(String.format("Downloading %s: to %s", jsonUrl, outputFile.getAbsolutePath()));
+            shell.writeln(String.format("Downloading %s: to %s", jsonUrl, outputFile.getAbsolutePath()));
 
             try {
                 downloadFile(new URL(jsonUrl), outputFile);
@@ -164,13 +168,13 @@ class startupUpload {
                     json // json
                 );
 
-                System.out.println(String.format("Successfully uploaded data to Horreum: %s", runID));
+                shell.writeln(String.format("Successfully uploaded data to Horreum: %s", runID));
 
             } catch (IOException e) {
-                System.err.println(String.format("Failed to upload to Horreum: %s", jsonUrl));
+                shell.writeln(String.format("ERROR: Failed to upload to Horreum: %s", jsonUrl));
             }
 
-            System.out.println(jsonUrl);
+            shell.writeln(jsonUrl);
         }
 
         private void downloadFile(URL fileUrl, File outputFile) throws IOException {
